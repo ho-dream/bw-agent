@@ -15,6 +15,25 @@
 
 - **Runtime**: [opencode](https://opencode.ai) + opencode plugins
 
+## OpenCode 记忆机制
+
+本项目使用 opencode 的多级长期记忆体系，理解以下结构以正确扩展项目能力：
+
+### Skills（技能）
+
+技能放置在 `.opencode/skills/<name>/SKILL.md`，每个技能是一个独立的 `SKILL.md` 文件，包含 YAML frontmatter（`name`、`description` 必填）和 Markdown 正文指令。代理通过 `skill` 工具按需加载。
+
+当本项目需要新增 skill 时，必须读取 `.opencode/skills/` 目录下已有的 skill 作为参考，遵循相同的 frontmatter 格式和编写风格。
+
+### 记忆层级（优先级从高到低）
+
+1. **项目级** — 项目根目录 `AGENTS.md`，随 Git 提交，团队共享
+2. **项目级 Skills** — `.opencode/skills/<name>/SKILL.md`
+3. **全局级** — `~/.config/opencode/AGENTS.md`，跨所有项目生效
+4. **全局级 Skills** — `~/.config/opencode/skills/<name>/SKILL.md`
+
+详见：https://opencode.ai/docs/zh-cn/skills/
+
 ## 参考项目
 
 - **bw-agent**: `~/Documents/experiment_area/bw-agent` — 原始项目，harness 方式的复现目标
