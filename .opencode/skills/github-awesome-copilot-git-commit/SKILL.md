@@ -1,17 +1,13 @@
 ---
 name: git-commit
 description: 'Execute git commit with conventional commit message analysis, intelligent staging, and message generation. Use when user asks to commit changes, create a git commit, or mentions "/commit". Supports: (1) Auto-detecting type and scope from changes, (2) Generating conventional commit messages from diff, (3) Interactive commit with optional type/scope/description overrides, (4) Intelligent file staging for logical grouping'
-license: MIT
-allowed-tools: Bash
 ---
 
 # Git Commit with Conventional Commits
 
-## Overview
+基于 Conventional Commits 规范创建标准化 git commit。所有 git 操作通过跨平台的 bun TypeScript 脚本执行。
 
-Create standardized, semantic git commits using the Conventional Commits specification. Analyze the actual diff to determine appropriate type, scope, and message.
-
-## Conventional Commit Format
+## Conventional Commit 格式
 
 ```
 <type>[optional scope]: <description>
@@ -37,83 +33,56 @@ Create standardized, semantic git commits using the Conventional Commits specifi
 | `chore`    | Maintenance/misc               |
 | `revert`   | Revert commit                  |
 
-## Breaking Changes
+## 脚本路径
 
-```
-# Exclamation mark after type/scope
-feat!: remove deprecated endpoint
+脚本位于本 skill 目录下：`scripts/commit.ts`
 
-# BREAKING CHANGE footer
-feat: allow config to extend other configs
-
-BREAKING CHANGE: `extends` key behavior changed
-```
-
-## Workflow
-
-### 1. Analyze Diff
+需要从项目根目录执行：
 
 ```bash
-# If files are staged, use staged diff
-git diff --staged
-
-# If nothing staged, use working tree diff
-git diff
-
-# Also check status
-git status --porcelain
+bun .opencode/skills/github-awesome-copilot-git-commit/scripts/commit.ts [command|options]
 ```
 
-### 2. Stage Files (if needed)
+## 工作流
 
-If nothing is staged or you want to group changes differently:
+### 1. 查看当前变更
 
 ```bash
-# Stage specific files
-git add path/to/file1 path/to/file2
-
-# Stage by pattern
-git add *.test.*
-git add src/components/*
-
-# Interactive staging
-git add -p
+bun .opencode/skills/github-awesome-copilot-git-commit/scripts/commit.ts diff
 ```
-
-**Never commit secrets** (.env, credentials.json, private keys).
-
-### 3. Generate Commit Message
-
-Analyze the diff to determine:
-
-- **Type**: What kind of change is this?
-- **Scope**: What area/module is affected?
-- **Description**: One-line summary of what changed (present tense, imperative mood, <72 chars)
-
-### 4. Execute Commit
 
 ```bash
-# Single line
-git commit -m "<type>[scope]: <description>"
-
-# Multi-line with body/footer
-git commit -m "$(cat <<'EOF'
-<type>[scope]: <description>
-
-<optional body>
-
-<optional footer>
-EOF
-)"
+bun .opencode/skills/github-awesome-copilot-git-commit/scripts/commit.ts status
 ```
 
-## Best Practices
+### 2. 执行 Commit
 
-- One logical change per commit
-- Present tense: "add" not "added"
-- Imperative mood: "fix bug" not "fixes bug"
-- Reference issues: `Closes #123`, `Refs #456`
-- Keep description under 72 characters
+```bash
+bun .opencode/skills/github-awesome-copilot-git-commit/scripts/commit.ts -t <type> -d "<description>"
+```
+
+完整选项：
+
+| 选项                  | 说明                           |
+| --------------------- | ------------------------------ |
+| `-t, --type <type>`   | Commit 类型（必填）            |
+| `-s, --scope <scope>` | 作用范围（可选）               |
+| `-b, --breaking`      | 标记为 breaking change         |
+| `-d, --description>`  | 简短描述，<72 字符（必填）     |
+| `--body <body>`       | 详细说明（可选）               |
+| `--footer <footer>`   | 页脚，如 `Closes #123`（可选） |
+| `-S, --stage <files>` | 逗号分隔的文件列表，commit 前暂存 |
+| `--dry-run`           | 仅打印消息，不实际 commit      |
+
+### 3. 示例
+
+```bash
+bun .opencode/skills/github-awesome-copilot-git-commit/scripts/commit.ts -t feat -s auth -d "add login flow"
+
+bun .opencode/skills/github-awesome-copilot-git-commit/scripts/commit.ts -t fix -d "resolve null pointer" --body "Fixes edge case when input is empty" --footer "Closes #42"
+
+bun .opencode/skills/github-awesome-copilot-git-commit/scripts/commit.ts --dry-run -t refactor -d "extract utils"
+```
 
 ## Git Safety Protocol
 
@@ -122,3 +91,4 @@ EOF
 - NEVER skip hooks (--no-verify) unless user asks
 - NEVER force push to main/master
 - If commit fails due to hooks, fix and create NEW commit (don't amend)
+- NEVER commit secrets (.env, credentials.json, private keys)
